@@ -1,0 +1,130 @@
+package com.example.keksiparisuygulamasi
+
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.example.keksiparisuygulamasi.ui.OrderViewModel
+
+
+enum class KekAppEnumClass() {
+    Start,
+    Flavor,
+    Pickup,
+    Summary
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CupcakeAppBar(
+    canNavigateBack: Boolean,
+    navigateUp: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    TopAppBar(
+        title = {
+            Text(stringResource(id = R.string.app_name))
+        },
+        colors = TopAppBarDefaults.mediumTopAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+        modifier = modifier,
+        navigationIcon = {
+            if (canNavigateBack) {
+                IconButton(onClick = navigateUp) {
+                    Icon(imageVector = Icons.Outlined.ArrowBack, contentDescription = "Back Button")
+                }
+                println("Navigate bback")
+            }
+
+        }
+    )
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CupcakeApp(
+    myViewModel: OrderViewModel = viewModel(),
+    navController: NavHostController = rememberNavController()
+
+) {
+    //val myUiState by myViewModel.uiState.collectAsState()
+    // View modeli ekledim. SImdi flow'u collect etmem gerekiyor.
+    // Artik myUiState isimli degiskenim uzerinden view Modelde bulunan state degerine erisebilirim.
+    // View model de bulunan fonksiyonlari tetiklemek icinse myViewModel.funcName syntaxini
+    // kullanmam gerekiyor
+    Scaffold(topBar = {
+        CupcakeAppBar(canNavigateBack = false, navigateUp = {
+            myViewModel.printt()
+            println("Navigate yapildi")
+        })
+    }) {
+        println(it)
+        val uiState by myViewModel.uiState.collectAsState()
+//        NavHost(
+//            /// navController NavHostController classinin bir ojbesidir. Bu obje ile ekranlar arasinda geziyoruz.
+//            //Peki bunu nasil yapiyoruz? .navigate() metotunu cagirarak yapiyoruz.
+//            navController = navController,
+//            startDestination = KekAppEnumClass.Start.name,
+//            modifier = Modifier.padding(it)
+//        ) {
+//            // NavHost normal parametreler aldiktan sonra bide composable() isimli bir Composable  aliyor.
+//            composable(route = KekAppEnumClass.Start.name) {
+//                StartOrderScreen(
+//                    deneme = DataSource.deneme,
+//
+//                    )
+//            }
+//            composable(route = KekAppEnumClass.Flavor.name) {
+//// Burda burdaki contexti bir degiskene aldim.
+//                val context = LocalContext.current
+//                // Burda context'i neden aldim. Sistem dosyalarina erismek icin. Ornegin.
+//                // DataSource isimli singleton object isimli sinifta benim flavors isimli
+//                // bir liste degiskeni var. Yani bu bir class degiskeni. Bu liste string.xml icindeki stringleri
+//                //  adreslerini tutuyor. Yani soyle:
+//// val flavors = listOf(R.string.vanilla,R.string.chocolate,  R.string.red_velvet)
+//                // Simdi bu adresler sayilar seklinde tutuluyor bu liste icinde. Ben bunu map
+////                fonksiyonu yardimi ile gercek verilere donusturcem. Bunun icinde bana context lazim
+////                Neden Context?  Cunku oraya ersimem gerekiyor.
+//                // baska ekran gircem buraya
+//                SelectOptionScreen(subtotal = myUiState.price)
+//            }
+//        }
+    }
+
+}
+
+
+POPBACK YAPARAK GERIYE NAVIGASYON YAPMA ISLEMI
+     composable(route = CupcakeScreen.Summary.name) {
+                    OrderSummaryScreen(
+                        orderUiState = uiState,
+                        onCancelButtonClicked = {
+                            println("Cancel butonu calisti")
+                            // Geri gelmek icin kullanilan navigasyon yontemi navController.popBackStack()
+                            // dir. Bu iki parametre alir:
+                            // 1. Route gidecegi rotayi yazariz.
+                            // 2. Bir boolean deger inclusive: False or True
+                            // Eger true ise hangi ekrandan bu ekrana geldiysek o ekrani da stack'den
+                            // kaldirir.Eger false ise bu ekrani cagiran ekrani stack'te tutar geri kalani
+                            // stack'ten siler
+                            navController.popBackStack(CupcakeScreen.Start.name,false)
+                        },
+                        onSendButtonClicked = { subject: String, summary: String ->
+                        }
+                    )
+                }
